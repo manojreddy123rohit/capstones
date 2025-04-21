@@ -1,49 +1,50 @@
 const express = require("express");
+const expressLayouts = require('express-ejs-layouts');
 const app = express();
-const PORT = 3000;
 
 app.set("view engine", "ejs");
-app.use(express.urlencoded({ extended: true }));
+app.set('layout', 'layout'); // 👈 Tells express-ejs-layouts to use views/layout.ejs
 
-let books = [];
+app.use(expressLayouts);
+app.use(express.static("public"));
+app.use(express.urlencoded({ extended: true })); // ✅ This enables form POST body parsing
+
+let posts = []; // Temporary in-memory storage
 
 app.get("/", (req, res) => {
-    res.render("index", { books });
+  res.render("index", { posts });
 });
 
-app.get("/add", (req, res) => {
-    res.render("add");
+app.get("/new", (req, res) => {
+  res.render("new");
 });
 
-app.post("/add", (req, res) => {
-    const { title, author, rating, date } = req.body;
-    books.push({ id: Date.now(), title, author, rating, date });
-    res.redirect("/");
+app.post("/new", (req, res) => {
+  const { title, content } = req.body;
+  const id = Date.now().toString();
+  posts.push({ id, title, content });
+  res.redirect("/");
 });
 
 app.get("/edit/:id", (req, res) => {
-    const book = books.find(b => b.id == req.params.id);
-    if (!book) return res.send("Book not found");
-    res.render("edit", { book });
+  const post = posts.find(p => p.id === req.params.id);
+  res.render("edit", { post });
 });
 
 app.post("/edit/:id", (req, res) => {
-    const { title, author, rating, date } = req.body;
-    const book = books.find(b => b.id == req.params.id);
-    if (book) {
-        book.title = title;
-        book.author = author;
-        book.rating = rating;
-        book.date = date;
-    }
-    res.redirect("/");
+  const { title, content } = req.body;
+  const post = posts.find(p => p.id === req.params.id);
+  post.title = title;
+  post.content = content;
+  res.redirect("/");
 });
 
 app.post("/delete/:id", (req, res) => {
-    books = books.filter(book => book.id != req.params.id);
-    res.redirect("/");
+  posts = posts.filter(p => p.id !== req.params.id);
+  res.redirect("/");
 });
 
+const PORT = 3000;
 app.listen(PORT, () => {
-    console.log(`Book Tracker running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });

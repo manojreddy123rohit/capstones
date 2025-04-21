@@ -1,0 +1,15 @@
+<% if (posts.length === 0) { %>
+    <p>No posts yet. <a href="/new">Write one!</a></p>
+  <% } else { %>
+    <% posts.forEach(post => { %>
+      <article class="post">
+        <h2><%= post.title %></h2>
+        <p><%= post.content %></p>
+        <form action="/delete/<%= post.id %>" method="POST" style="display:inline;">
+          <button type="submit">Delete</button>
+        </form>
+        <a href="/edit/<%= post.id %>">Edit</a>
+      </article>
+    <% }) %>
+  <% } %>
+  
